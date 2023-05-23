@@ -1,0 +1,52 @@
+name: GNOME Boxes Appimage
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: build
+      run: |
+        sudo apt update && sudo apt install libfuse2
+        git clone https://github.com/ivan-hc/Boxes-appimage.git
+        cd Boxes-appimage
+        chmod a+x appimagen build.sh
+        ./build.sh
+        cd ..
+        version=$(wget -q https://packages.debian.org/en/testing/gnome-boxes -O - | grep "Package:" | head -1 | cut -c 27- | rev | cut -c 2- | rev)
+        mkdir dist
+        mv Boxes-appimage/*AppImage dist/Boxes-$version-x86_64.AppImage
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: Boxes-x86_64.AppImage
+        path: 'dist'
+        
+  release:
+      needs: [build]
+      permissions: write-all
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/download-artifact@v1
+          with:
+            name: Boxes-x86_64.AppImage
+
+        - name: release
+          uses: marvinpinto/action-automatic-releases@latest
+          with:
+            title: Continuous build
+            automatic_release_tag: continuous
+            prerelease: true
+            draft: false
+            files: |
+              Boxes-x86_64.AppImage
+            repo_token: ${{ secrets.GITHUB_TOKEN }}
