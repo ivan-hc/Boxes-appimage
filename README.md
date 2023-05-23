@@ -34,4 +34,6 @@ Boxex requires the access to some online resources to recommend downloads or to 
      util-app.vala:199: Failed to download recommended-downloads file: Non è disponibile il supporto a TLS
 Due to this I'm unable to check if it is possible to install and use a Virtual Machine.
 
+https://github.com/ivan-hc/Boxes-appimage/assets/88724353/6e1dbf86-3662-43fb-84d6-4344333852bd
+
 #### Want to help me improve this AppImage? Just clone this repo and merge a pull request, any improvements are welcome.
