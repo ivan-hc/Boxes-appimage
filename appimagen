@@ -1,38 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=2.1-1
-
-case "$1" in
-
--h|--help) echo "
- APPIMAGEN $VERSION"
-echo ' 
- AN INTERACTIVE SCRIPT THAT GENERATES AN APPIMAGE FROM DEBIAN OR FROM A PPA OF
- YOUR CHOICE FOR THE PREVIOUS (NOT THE OLDEST) AND STILL SUPPORTED UBUNTU LTS.
-
- USAGE:	
-
-   appimagen [package1] [package2] [package3]
- 
- EXAMPLES:
-
-   appimagen chromium-browser chromium-browser-l10n
-   appimagen mpv ffmpeg
- 		
- OPTIONS:	
- 
-   -h/--help		Shows this message
-   -v/--version		Shows the version of this script
- 
- SITE:		https://github.com/ivan-hc/AppImaGen
- 
- THIS SCRIPT IS PART OF https://github.com/ivan-hc/AM-APPLICATION-MANAGER
-';;
-
--v|--version) echo "AppImaGen $VERSION";;
-
-*)
-APP=$1
+APP=gnome-boxes
 
 # CREATE A TEMPORARY DIRECTORY
 mkdir -p tmp;
@@ -57,55 +25,42 @@ rm -f ./recipe.yml
 # CREATING THE HEAD OF THE RECIPE
 echo "app: $APP
 binpatch: true
-
 ingredients:" >> recipe.yml
-
-# CHECK THE NAME OF THE PREVIOUS "UBUNTU LTS" STILL SUPPORTED
-PREVIOUSLTS=$(wget -q https://releases.ubuntu.com/ -O - | grep class | grep LTS | grep -m2 href | tail -n1 | sed -n 's/.*href="\([^"]*\).*/\1/p' | rev| cut -c 2- | rev)
-
-
-# CHOOSE BETWEEN UBUNTU AND DEBIAN
-read -r -p " WHAT DISTRO YOU CHOOSE BETWEEN DEBIAN (1) AND UBUNTU $PREVIOUSLTS (2)? : " distribution
-case "$distribution" in
-debian|DEBIAN|Debian|1) read -r -p " WHAT BRANCH OF DEBIAN YOU CHOOSE (stable, testing, oldstable...)?" DEBIANBRANCH
-	case "$DEBIANBRANCH" in
-	*) echo -e "\n  dist: $DEBIANBRANCH\n  sources:\n    - deb http://ftp.debian.org/debian/ $DEBIANBRANCH main contrib non-free\n    - deb http://security.debian.org/debian-security/ $DEBIANBRANCH-security main contrib non-free\n    - deb http://ftp.debian.org/debian/ $DEBIANBRANCH-updates main contrib non-free" >> recipe.yml;;
-	esac;;
-ubuntu|UBUNTU|Ubuntu|2) echo -e "\n  dist: $PREVIOUSLTS\n  sources:\n    - deb http://archive.ubuntu.com/ubuntu/ $PREVIOUSLTS main universe restricted multiverse\n    - deb http://archive.ubuntu.com/ubuntu $PREVIOUSLTS-security main universe restricted multiverse\n    - deb http://archive.ubuntu.com/ubuntu/ $PREVIOUSLTS-updates main universe restricted multiverse" >> recipe.yml
-	# IF UBUNTU, CHOOSE A PPA
-	read -p " DO YOU WISH TO ADD A PPA (y,N)?" yn
-		case $yn in
-		'Y'|'y') read -r -p " ADD THE PPA (example 'name/repository') : " ppa
-			case $ppa in
-			*) echo -e "  ppas:\n    - $ppa" >> recipe.yml
-			esac
-			while true; do
-			read -p " DO YOU WISH TO ADD ANOTHER PPA (y,N)?" yn
-			case $yn in
-			'Y'|'y') while true; do
-				read -r -p " ADD THE PPA (example 'name/repository') : " ppa
-				case $ppa in
-				*) echo "    - $ppa" >> recipe.yml && break
-				esac
-				done;;
-			'N'|'n'|*) break;;
-			esac
-			done;;
-		'N'|'n'|*) break;;
-	esac
-esac
-
-# ADD THE OTHER PACKAGES
+DEBIANBRANCH=testing
+echo -e "\n  dist: $DEBIANBRANCH\n  sources:\n    - deb http://ftp.debian.org/debian/ $DEBIANBRANCH main contrib non-free\n    - deb http://security.debian.org/debian-security/ $DEBIANBRANCH-security main contrib non-free\n    - deb http://ftp.debian.org/debian/ $DEBIANBRANCH-updates main contrib non-free" >> recipe.yml
 echo "  packages:
-    - $1
-    - $2
-    - $3
-    - $4
-    - $5
-    - $6
-    - $7
-    - $8
-    - $9" >> recipe.yml
+    - gnome-boxes
+    - gir1.2-libosinfo-1.0
+    - gsettings-desktop-schemas
+    - gsettings-backend
+    - xapps-common
+    - qemu-system-x86
+    - libgtk-3-common
+    - libgtk-4-common
+    - genisoimage
+    - libosinfo-bin
+    - libvirt-daemon
+    - tracker
+    - dconf-gsettings-backend
+    - libarchive13
+    - libc6
+    - libcairo2
+    - libgdk-pixbuf-2.0-0
+    - libglib2.0-0
+    - libgtk-3-0
+    - libgudev-1.0-0
+    - libhandy-1-0
+    - libosinfo-1.0-0
+    - libsecret-1-0
+    - libsoup-3.0-0
+    - libspice-client-glib-2.0-8
+    - libspice-client-gtk-3.0-5
+    - libtracker-sparql-3.0-0
+    - libusb-1.0-0
+    - libvirt
+    - libvirt-glib-1.0-0
+    - libwebkit2gtk-4.1-0
+    - libxml2">> recipe.yml
 
 # DOWNLOAD ALL THE NEEDED PACKAGES AND COMPILE THE APPDIR
 ./pkg2appimage ./recipe.yml
@@ -120,22 +75,13 @@ export UNION_PRELOAD="${HERE}"
 EOF
 
 # LIBUNIONPRELOAD
-read -p ' Do you wish to add libunionpreload (y,N)?' yn
-case $yn in
-	'Y'|'y') wget https://github.com/project-portable/libunionpreload/releases/download/amd64/libunionpreload.so
-		chmod a+x libunionpreload.so
-		mv ./libunionpreload.so ./$APP/$APP.AppDir/
-		echo 'export LD_PRELOAD="${HERE}"/libunionpreload.so:"${HERE}"/usr/lib/x86_64-linux-gnu/gnome-boxes/libgovf-0.1.so' >> ./$APP/$APP.AppDir/AppRun;;
-	'N'|'n'|*) echo "Proceeding without libunionpreload";;
-esac
+#wget https://github.com/project-portable/libunionpreload/releases/download/amd64/libunionpreload.so
+#chmod a+x libunionpreload.so
+#mv ./libunionpreload.so ./$APP/$APP.AppDir/
+echo 'export LD_PRELOAD="${HERE}"/usr/lib/x86_64-linux-gnu/gnome-boxes/libgovf-0.1.so' >> ./$APP/$APP.AppDir/AppRun
 
 # SYSTEM LIBRARIES
-read -p ' Do you wish to include system libraries (Y,n)?' yn
-case $yn in
-	'N'|'n') echo 'export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"' >> ./$APP/$APP.AppDir/AppRun;;
-	'Y'|'y'|*) echo 'export LD_LIBRARY_PATH=/lib/:/lib64/:/lib/x86_64-linux-gnu/:/usr/lib/:"${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"' >> ./$APP/$APP.AppDir/AppRun;;
-
-esac
+echo 'export LD_LIBRARY_PATH=/lib/:/lib64/:/lib/x86_64-linux-gnu/:/usr/lib/:"${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"' >> ./$APP/$APP.AppDir/AppRun
 
 # CUSTOMIZE THE APPRUN (PART 2)
 cat >> ./$APP/$APP.AppDir/AppRun << 'EOF'
@@ -150,14 +96,7 @@ EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | s
 EOF
 
 # BINARY PATH
-read -p ' Do you wish to specify the binary`s path manually (y,N)?' yn
-case $yn in 
-	'Y'|'y') read -r -p " ◆ ADD THE PATH (EXAMPLE '/usr/lib.../$APP'):" RESPONSE
-		case "$RESPONSE" in
-			*) echo 'exec "${HERE}"'$RESPONSE' "$@"' >> ./$APP/$APP.AppDir/AppRun;;
-		esac;;
-	'N'|'n'|*) echo 'exec ${EXEC} "$@"' >> ./$APP/$APP.AppDir/AppRun;;
-esac
+echo 'exec ${EXEC} "$@"' >> ./$APP/$APP.AppDir/AppRun
 	
 # MADE THE APPRUN EXECUTABLE
 chmod a+x ./$APP/$APP.AppDir/AppRun
@@ -190,5 +129,5 @@ glib-compile-schemas ./$APP/$APP.AppDir/usr/share/glib-2.0/schemas/
 ARCH=x86_64 ./appimagetool -n ./$APP/$APP.AppDir
 cd ..
 mv ./tmp/*.AppImage .
-chmod a+x *.AppImage;;
-esac
+chmod a+x *.AppImage
+
