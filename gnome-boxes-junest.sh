@@ -3,7 +3,7 @@
 # NAME OF THE APP BY REPLACING "SAMPLE"
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="xdg-desktop-portal-xapp xapp"
+DEPENDENCES="xdg-desktop-portal-xapp xapp libcanberra"
 BASICSTUFF="binutils gzip"
 #COMPILERS="gcc"
 
