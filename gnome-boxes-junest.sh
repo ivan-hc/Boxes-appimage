@@ -3,16 +3,9 @@
 # NAME OF THE APP BY REPLACING "SAMPLE"
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="ca-certificates xdg-desktop-portal-xapp xapp libcanberra libvirt"
-BASICSTUFF="binutils gzip"
+DEPENDENCES="ca-certificates cairo cdrtools dconf hicolor-icon-theme kvm libarchive libcanberra libgudev libhandy libosinfo libsecret libusb libvirt libvirt-glib mtools qemu-base qemu-common qemu-desktop spice-gtk xapp xdg-desktop-portal-xapp xdg-user-dirs"
+#BASICSTUFF="binutils gzip"
 #COMPILERS="base-devel"
-
-# ADD A VERSION, THIS IS NEEDED FOR THE NAME OF THE FINEL APPIMAGE, IF NOT AVAILABLE ON THE REPO, THE VALUE COME FROM AUR, AND VICE VERSA
-for REPO in { "core" "extra" "community" "multilib" }; do
-echo "$(wget -q https://archlinux.org/packages/$REPO/x86_64/$APP/flag/ -O - | grep $APP | grep details | head -1 | grep -o -P '(?<=/a> ).*(?= )' | grep -o '^\S*')" >> version
-done
-VERSION=$(cat ./version | grep -w -v "" | head -1)
-VERSIONAUR=$(wget -q https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=$APP -O - | grep pkgver | head -1 | cut -c 8-)
 
 # CREATE THE APPDIR (DON'T TOUCH THIS)...
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
@@ -46,9 +39,10 @@ Include = /etc/pacman.d/mirrorlist" >> ./.junest/etc/pacman.conf
 
 # CUSTOM MIRRORLIST, THIS SHOULD SPEEDUP THE INSTALLATION OF THE PACKAGES IN PACMAN (COMMENT EVERYTHING TO USE THE DEFAULT MIRROR)
 _custom_mirrorlist(){
-	COUNTRY=$(curl -i ipinfo.io | grep country | cut -c 15- | cut -c -2)
+	#COUNTRY=$(curl -i ipinfo.io | grep country | cut -c 15- | cut -c -2)
 	rm -R ./.junest/etc/pacman.d/mirrorlist
-	wget -q https://archlinux.org/mirrorlist/?country="$(echo $COUNTRY)" -O - | sed 's/#Server/Server/g' >> ./.junest/etc/pacman.d/mirrorlist
+	wget -q https://archlinux.org/mirrorlist/all/ -O - | awk NR==2 RS= | sed 's/#Server/Server/g' >> ./.junest/etc/pacman.d/mirrorlist # ENABLES WORLDWIDE MIRRORS
+	#wget -q https://archlinux.org/mirrorlist/?country="$(echo $COUNTRY)" -O - | sed 's/#Server/Server/g' >> ./.junest/etc/pacman.d/mirrorlist # ENABLES MIRRORS OF YOUR COUNTY
 }
 _custom_mirrorlist
 
@@ -104,7 +98,7 @@ export JUNEST_HOME=$HERE/.junest
 export PATH=$PATH:$HERE/.local/share/junest/bin
 mkdir -p $HOME/.cache
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
-$HERE/.local/share/junest/bin/junest -n 2> /dev/null -- $EXEC "$@"
+$HERE/.local/share/junest/bin/junest -n -- $EXEC "$@"
 EOF
 chmod a+x ./AppRun
 
@@ -112,29 +106,29 @@ chmod a+x ./AppRun
 sed -i 's#${JUNEST_HOME}/usr/bin/junest_wrapper#${HOME}/.cache/junest_wrapper.old#g' ./.local/share/junest/lib/core/wrappers.sh
 sed -i 's/rm -f "${JUNEST_HOME}${bin_path}_wrappers/#rm -f "${JUNEST_HOME}${bin_path}_wrappers/g' ./.local/share/junest/lib/core/wrappers.sh
 sed -i 's/ln/#ln/g' ./.local/share/junest/lib/core/wrappers.sh
-sed -i 's#--bind "$HOME" "$HOME"#--bind /opt /opt --bind /usr/lib/locale /usr/lib/locale --bind /etc /etc --bind /usr/share/fonts /usr/share/fonts --bind /usr/share/themes /usr/share/themes --bind /mnt /mnt --bind /media /media --bind /home /home --bind /run/user /run/user#g' .local/share/junest/lib/core/namespace.sh
+sed -i 's#--bind "$HOME" "$HOME"#--bind /opt /opt --bind /usr/lib/locale /usr/lib/locale --bind /etc/profile /etc/profile --bind /usr/share/fonts /usr/share/fonts --bind /usr/share/themes /usr/share/themes --bind /mnt /mnt --bind /media /media --bind /home /home --bind /run/user /run/user#g' .local/share/junest/lib/core/namespace.sh
 
 # EXIT THE APPDIR
 cd ..
 
 # EXTRACT PACKAGE CONTENT
 mkdir base
-tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/$APP*.zst -C ./base/
-
+tar fx $(find ./$APP.AppDir -name $APP-[0-9]*zst | head -1) -C ./base/
+VERSION=$(cat ./base/.PKGINFO | grep pkgver | cut -c 10- | sed 's@.*:@@')
 mkdir deps
 
 ARGS=$(echo "$DEPENDENCES" | tr " " "\n")
 for arg in $ARGS; do
 	for var in $arg; do
- 		tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/$arg*.zst -C ./deps/
-		cat ./deps/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<" > depdeps
+ 		tar fx $(find ./$APP.AppDir -name $arg-[0-9]*zst) -C ./deps/
+ 		cat ./deps/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<" > depdeps
 	done
 done
 
 DEPS=$(cat ./base/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<")
 for arg in $DEPS; do
 	for var in "$arg"; do
- 		tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/"$arg"*.zst -C ./deps/
+ 		tar fx $(find ./$APP.AppDir -name $arg-[0-9]*zst) -C ./deps/
  		cat ./deps/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<" > depdeps
 	done
 done
@@ -142,7 +136,7 @@ done
 DEPS2=$(cat ./depdeps | uniq)
 for arg in $DEPS2; do
 	for var in "$arg"; do
- 		tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/"$arg"*.zst -C ./deps/
+ 		tar fx $(find ./$APP.AppDir -name $arg-[0-9]*zst) -C ./deps/
  		cat ./deps/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<" > depdeps2
  	done
 done
@@ -150,7 +144,7 @@ done
 DEPS3=$(cat ./depdeps2 | uniq)
 for arg in $DEPS3; do
 	for var in "$arg"; do
- 		tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/"$arg"*.zst -C ./deps/
+ 		tar fx $(find ./$APP.AppDir -name $arg-[0-9]*zst) -C ./deps/
  		cat ./deps/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<" > depdeps3
  	done
 done
@@ -158,7 +152,7 @@ done
 DEPS4=$(cat ./depdeps3 | uniq)
 for arg in $DEPS4; do
 	for var in "$arg"; do
- 		tar fx $APP.AppDir/.junest/var/cache/pacman/pkg/"$arg"*.zst -C ./deps/
+ 		tar fx $(find ./$APP.AppDir -name $arg-[0-9]*zst) -C ./deps/
  		cat ./deps/.PKGINFO | grep "depend = " | grep -v "makedepend = " | cut -c 10- | grep -v "=\|>\|<" > depdeps4
  	done
 done
@@ -178,7 +172,7 @@ rm -R -f ./$APP.AppDir/.junest/var/* #REMOVE ALL PACKAGES DOWNLOADED WITH THE PA
 
 BINSAVED="certificates qemu virt" # Enter here keywords to find and save in /usr/bin
 SHARESAVED="certificates gtk qemu virt" # Enter here keywords or file/folder names to save in both /usr/share and /usr/lib
-LIBSAVED="pk p11 alsa jack pipewire pulse qemu virt" # Enter here keywords or file/folder names to save in /usr/lib
+LIBSAVED="pk p11 alsa jack pipewire pulse gtk qemu virt" # Enter here keywords or file/folder names to save in /usr/lib
 
 # STEP 1, CREATE A BACKUP FOLDER WHERE TO SAVE THE FILES TO BE DISCARDED (USEFUL FOR TESTING PURPOSES)
 mkdir -p ./junest-backups/usr/bin
@@ -205,7 +199,7 @@ _savebins(){
  	rsync -av ./base/usr/bin/* ./$APP.AppDir/.junest/usr/bin/
 	rmdir save
 }
-#_savebins 2> /dev/null
+_savebins 2> /dev/null
 
 # STEP 3, MOVE UNNECESSARY LIBRARIES TO A BACKUP FOLDER (FOR TESTING PURPOSES)
 mkdir save
@@ -280,19 +274,19 @@ _mvlibs(){
  	rsync -av ./base/usr/lib/* ./$APP.AppDir/.junest/usr/lib/
 }
 
-#_binlibs 2> /dev/null
+_binlibs 2> /dev/null
 
-#_include_swrast_dri 2> /dev/null
+_include_swrast_dri 2> /dev/null
 
-#_libkeywords 2> /dev/null
+_libkeywords 2> /dev/null
 
-#_liblibs 2> /dev/null
-#_liblibs 2> /dev/null
-#_liblibs 2> /dev/null
-#_liblibs 2> /dev/null
-#_liblibs 2> /dev/null
+_liblibs 2> /dev/null
+_liblibs 2> /dev/null
+_liblibs 2> /dev/null
+_liblibs 2> /dev/null
+_liblibs 2> /dev/null
 
-#_mvlibs 2> /dev/null
+_mvlibs 2> /dev/null
 
 rmdir save
 
@@ -318,12 +312,11 @@ _saveshare(){
  	rsync -av ./base/usr/share/* ./$APP.AppDir/.junest/usr/share/
 	rmdir save
 }
-#_saveshare 2> /dev/null
+_saveshare 2> /dev/null
 
 # RSYNC DEPENDENCES
-#rsync -av ./deps/usr/bin/* ./$APP.AppDir/.junest/usr/bin/
-#rsync -av ./deps/usr/lib/* ./$APP.AppDir/.junest/usr/lib/
-#rsync -av ./deps/usr/share/* ./$APP.AppDir/.junest/usr/share/
+rm -R -f ./deps/.*
+rsync -av ./deps/* ./$APP.AppDir/.junest/
 
 # ADDITIONAL REMOVALS
 #mv ./$APP.AppDir/.junest/usr/lib/libLLVM-* ./junest-backups/usr/lib/ #INCLUDED IN THE COMPILATION PHASE, CAN SOMETIMES BE EXCLUDED FOR DAILY USE
@@ -342,4 +335,4 @@ mkdir -p ./$APP.AppDir/.junest/run/user
 
 # CREATE THE APPIMAGE
 ARCH=x86_64 ./appimagetool -n ./$APP.AppDir
-mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION""$VERSIONAUR"-archimage3Pre1-x86_64.AppImage
+mv ./*AppImage ./"$(cat ./$APP.AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION"-archimage3-x86_64.AppImage
