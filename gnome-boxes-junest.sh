@@ -3,7 +3,7 @@
 # NAME OF THE APP BY REPLACING "SAMPLE"
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="ca-certificates cairo cdrtools dconf hicolor-icon-theme kvm libarchive libcanberra libgudev libhandy libosinfo libsecret libusb libvirt libvirt-glib mtools qemu-base qemu-common qemu-desktop spice-gtk xapp xdg-desktop-portal-xapp xdg-user-dirs"
+DEPENDENCES="ca-certificates cairo cdrtools dconf gnutls hicolor-icon-theme kvm libarchive libcanberra libgudev libhandy libosinfo libsecret libusb libvirt libvirt-glib mbedtls mtools nss openssl qemu-base qemu-common qemu-desktop spice-gtk xapp xdg-desktop-portal-xapp xdg-user-dirs"
 #BASICSTUFF="binutils gzip"
 #COMPILERS="base-devel"
 
