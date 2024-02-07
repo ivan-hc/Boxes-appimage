@@ -3,8 +3,8 @@
 APP=gnome-boxes
 
 # CREATE A TEMPORARY DIRECTORY
-mkdir -p tmp;
-cd tmp;
+mkdir -p tmp
+cd tmp
 
 # DOWNLOADING THE DEPENDENCIES
 if test -f ./appimagetool; then
@@ -25,78 +25,51 @@ rm -f ./recipe.yml
 # CREATING THE HEAD OF THE RECIPE
 echo "app: $APP
 binpatch: true
-ingredients:" >> recipe.yml
-DEBIANBRANCH=testing
-echo -e "\n  dist: $DEBIANBRANCH\n  sources:\n    - deb http://ftp.debian.org/debian/ $DEBIANBRANCH main contrib non-free\n    - deb http://security.debian.org/debian-security/ $DEBIANBRANCH-security main contrib non-free\n    - deb http://ftp.debian.org/debian/ $DEBIANBRANCH-updates main contrib non-free" >> recipe.yml
-echo "  packages:
-    - gnome-boxes
-    - gir1.2-libosinfo-1.0
-    - gsettings-desktop-schemas
-    - gsettings-backend
-    - xapps-common
+
+ingredients:
+
+  dist: stable
+  sources:
+    - deb http://ftp.debian.org/debian/ stable main contrib non-free
+    - deb http://security.debian.org/debian-security/ stable-security main contrib non-free
+    - deb http://ftp.debian.org/debian/ stable-updates main contrib non-free
+  packages:
+    - $APP
     - qemu-system-x86
     - libgtk-3-common
-    - libgtk-4-common
-    - genisoimage
-    - libosinfo-bin
-    - libvirt-daemon
-    - tracker
-    - dconf-gsettings-backend
-    - libarchive13
-    - libc6
-    - libcairo2
-    - libgdk-pixbuf-2.0-0
-    - libglib2.0-0
-    - libgtk-3-0
-    - libgudev-1.0-0
-    - libhandy-1-0
-    - libosinfo-1.0-0
-    - libsecret-1-0
-    - libsoup-3.0-0
-    - libspice-client-glib-2.0-8
-    - libspice-client-gtk-3.0-5
-    - libtracker-sparql-3.0-0
-    - libusb-1.0-0
-    - libvirt
-    - libvirt-glib-1.0-0
-    - libwebkit2gtk-4.1-0
-    - libxml2">> recipe.yml
+    - xapps-common" >> recipe.yml
+
 
 # DOWNLOAD ALL THE NEEDED PACKAGES AND COMPILE THE APPDIR
 ./pkg2appimage ./recipe.yml
 
-# THIS IS THE PART RELATED TO THE APPRUN SCRIPT, I.E. THE ENGINE OF THE APPIMAGE---------------------------------------------------------------
-# CUSTOMIZE THE APPRUN (PART 1)
+# LIBUNIONPRELOAD
+wget https://github.com/project-portable/libunionpreload/releases/download/amd64/libunionpreload.so
+chmod a+x libunionpreload.so
+mv ./libunionpreload.so ./$APP/$APP.AppDir/
+
+# COMPILE SCHEMAS
+glib-compile-schemas ./$APP/$APP.AppDir/usr/share/glib-2.0/schemas/ || echo "No ./usr/share/glib-2.0/schemas/"
+
+# CUSTOMIZE THE APPRUN
 rm -R -f ./$APP/$APP.AppDir/AppRun
 cat >> ./$APP/$APP.AppDir/AppRun << 'EOF'
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "${0}")")"
 export UNION_PRELOAD="${HERE}"
-EOF
-
-# LIBUNIONPRELOAD
-#wget https://github.com/project-portable/libunionpreload/releases/download/amd64/libunionpreload.so
-#chmod a+x libunionpreload.so
-#mv ./libunionpreload.so ./$APP/$APP.AppDir/
-echo 'export LD_PRELOAD="${HERE}"/usr/lib/x86_64-linux-gnu/gnome-boxes/libgovf-0.1.so' >> ./$APP/$APP.AppDir/AppRun
-
-# SYSTEM LIBRARIES
-echo 'export LD_LIBRARY_PATH=/lib/:/lib64/:/lib/x86_64-linux-gnu/:/usr/lib/:"${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"' >> ./$APP/$APP.AppDir/AppRun
-
-# CUSTOMIZE THE APPRUN (PART 2)
-cat >> ./$APP/$APP.AppDir/AppRun << 'EOF'
+export LD_PRELOAD="${HERE}"/libunionpreload.so:"${HERE}"/usr/lib/x86_64-linux-gnu/gnome-boxes/libgovf-0.1.so
+export LD_LIBRARY_PATH=/lib/:/lib64/:/lib/x86_64-linux-gnu/:/usr/lib/:"${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"
+#export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib/i386-linux-gnu/:"${HERE}"/usr/lib/x86_64-linux-gnu/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${LD_LIBRARY_PATH}"
 export PATH="${HERE}"/usr/bin/:"${HERE}"/usr/sbin/:"${HERE}"/usr/games/:"${HERE}"/bin/:"${HERE}"/sbin/:"${PATH}"
-export PYTHONPATH="${HERE}"/usr/share/pyshared/:"${HERE}"/usr/lib/python*/:"${PYTHONPATH}"
-export PYTHONHOME="${HERE}"/usr/:"${HERE}"/usr/lib/python*/
-export XDG_DATA_DIRS="${HERE}"/usr/share/:"${XDG_DATA_DIRS}"
-export PERLLIB="${HERE}"/usr/share/perl5/:"${HERE}"/usr/lib/perl5/:"${PERLLIB}"
+#export PYTHONPATH="${HERE}"/usr/share/pyshared/:"${HERE}"/usr/lib/python*/:"${PYTHONPATH}"
+#export PYTHONHOME="${HERE}"/usr/:"${HERE}"/usr/lib/python*/
+#export XDG_DATA_DIRS="${HERE}"/usr/share/:"${XDG_DATA_DIRS}"
+#export PERLLIB="${HERE}"/usr/share/perl5/:"${HERE}"/usr/lib/perl5/:"${PERLLIB}"
 export GSETTINGS_SCHEMA_DIR="${HERE}"/usr/share/glib-2.0/schemas/:"${GSETTINGS_SCHEMA_DIR}"
-export QT_PLUGIN_PATH="${HERE}"/usr/lib/qt4/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib32/qt4/plugins/:"${HERE}"/usr/lib64/qt4/plugins/:"${HERE}"/usr/lib/qt5/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib32/qt5/plugins/:"${HERE}"/usr/lib64/qt5/plugins/:"${QT_PLUGIN_PATH}"
+#export QT_PLUGIN_PATH="${HERE}"/usr/lib/qt4/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt4/plugins/:"${HERE}"/usr/lib32/qt4/plugins/:"${HERE}"/usr/lib64/qt4/plugins/:"${HERE}"/usr/lib/qt5/plugins/:"${HERE}"/usr/lib/i386-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib/x86_64-linux-gnu/qt5/plugins/:"${HERE}"/usr/lib32/qt5/plugins/:"${HERE}"/usr/lib64/qt5/plugins/:"${QT_PLUGIN_PATH}"
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
+exec ${EXEC} "$@"
 EOF
-
-# BINARY PATH
-echo 'exec ${EXEC} "$@"' >> ./$APP/$APP.AppDir/AppRun
 	
 # MADE THE APPRUN EXECUTABLE
 chmod a+x ./$APP/$APP.AppDir/AppRun
@@ -122,12 +95,8 @@ cp ./$APP/$APP.AppDir/usr/share/icons/hicolor/512x512/apps/*$ICONNAME* ./$APP/$A
 cp ./$APP/$APP.AppDir/usr/share/icons/hicolor/scalable/apps/*$ICONNAME* ./$APP/$APP.AppDir/ 2>/dev/null
 cp ./$APP/$APP.AppDir/usr/share/applications/*$ICONNAME* ./$APP/$APP.AppDir/ 2>/dev/null
 
-# COMPILE SCHEMAS
-glib-compile-schemas ./$APP/$APP.AppDir/usr/share/glib-2.0/schemas/
-
 # EXPORT THE APP TO AN APPIMAGE
 ARCH=x86_64 ./appimagetool -n ./$APP/$APP.AppDir
 cd ..
 mv ./tmp/*.AppImage .
 chmod a+x *.AppImage
-
