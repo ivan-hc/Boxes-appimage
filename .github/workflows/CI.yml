@@ -1,9 +1,11 @@
-name: GNOME Boxes Appimage
+name: Release Boxes Appimage
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
 on:
+  schedule:
+    - cron: "0 14 * * 3"
   workflow_dispatch:
 
 jobs:
@@ -13,16 +15,15 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: build
-      if: always()
       run: |
-        sudo apt update
-        sudo apt install libfuse2
-        wget https://raw.githubusercontent.com/ivan-hc/Boxes-appimage/main/gnome-boxes-junest.sh
-        chmod a+x ./gnome-boxes-junest.sh
-        ./gnome-boxes-junest.sh
+        APP=gnome-boxes
+        chmod +x create-arch-bootstrap.sh create-conty.sh "$APP"-conty-builder.sh
+        sudo ./create-arch-bootstrap.sh && ./create-conty.sh
+        mkdir -p tmp/"$APP".AppDir
+        mv ./conty.sh tmp/"$APP".AppDir/ || exit 1
+        ./"$APP"-conty-builder.sh
         mkdir dist
         mv *AppImage dist/
-
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
@@ -44,7 +45,7 @@ jobs:
           with:
             title: Continuous build
             automatic_release_tag: continuous
-            prerelease: true
+            prerelease: false
             draft: false
             files: |
               Boxes-x86_64.AppImage
