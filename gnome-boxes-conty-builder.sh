@@ -320,8 +320,7 @@ Terminal=false
 Type=Application
 StartupNotify=true
 Categories=System;
-MimeType=application/x-cd-image;
-DBusActivatable=true" > "$APP".desktop
+MimeType=application/x-cd-image;" > "$APP".desktop
 
 # APPRUN
 rm -f ./AppRun
