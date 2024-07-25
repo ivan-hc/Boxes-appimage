@@ -319,7 +319,7 @@ Icon=org.gnome.Boxes
 Terminal=false
 Type=Application
 StartupNotify=true
-Categories=GNOME;GTK;System;Development;Emulator;
+Categories=System;
 MimeType=application/x-cd-image;
 DBusActivatable=true" > "$APP".desktop
 
