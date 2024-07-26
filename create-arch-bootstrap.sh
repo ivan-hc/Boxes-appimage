@@ -35,7 +35,7 @@ devel_pkgs="base-devel git meson mingw-w64-gcc cmake"
 export packagelist="${audio_pkgs} ${video_pkgs} ${wine_pkgs} ${devel_pkgs} \
 	ttf-dejavu ttf-liberation xorg-xwayland wayland xdg-user-dirs libusb \
 	xorg-server xorg-apps curl gnome-boxes qemu-desktop hicolor-icon-theme \
-	gtk3 gtk4 libadwaita"
+	gtk3 gtk4 libadwaita xapp libvirt"
 
 # If you want to install AUR packages, specify them in this variable
 export aur_packagelist=""
