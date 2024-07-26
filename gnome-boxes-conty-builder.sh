@@ -328,7 +328,7 @@ cat >> ./AppRun << 'EOF'
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "${0}")")"
 export UNION_PRELOAD="${HERE}"
-"${HERE}"/conty.sh gnome-boxes "$@"
+"${HERE}"/conty.sh --bind-try /usr/share/themes /usr/share/themes gnome-boxes "$@"
 EOF
 chmod a+x ./AppRun
 
