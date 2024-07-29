@@ -378,6 +378,10 @@ run_in_chroot pacman -Q > "${bootstrap}"/pkglist.x86_64.txt
 run_in_chroot rm -f "${bootstrap}"/etc/locale.conf
 run_in_chroot sed -i 's/LANG=${LANG:-C}/LANG=$LANG/g' /etc/profile.d/locale.sh
 
+# Try to fix GTK/GDK error messages
+cp "${bootstrap}"/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so "${bootstrap}"/usr/lib/
+cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${bootstrap}"/usr/lib/
+
 # Remove bloatwares
 run_in_chroot rm -Rf /usr/include /usr/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*gnome-boxes*" -a -not -name "." -delete'
