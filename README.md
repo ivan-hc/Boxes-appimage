@@ -5,6 +5,20 @@ Unofficial AppImage of GNOME Boxes built on top of "Conty", the portable Arch Li
 
 ---------------------------------
 
+## Important!
+Since its internal bubblewrap version mounts /var, you need to install "libvirt" daemons and drivers from your package manager.
+
+On Debian and derivatives:
+```
+sudo apt install libvirt-daemon libvirt-daemon-system
+```
+On Arch Linux and derivatives:
+```
+sudo pacman -S libvirt
+```
+
+---------------------------------
+
 ### How it works
 
 1. Download the AppImage from https://github.com/ivan-hc/Boxes-appimage/releases
