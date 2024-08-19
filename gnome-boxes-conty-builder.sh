@@ -11,7 +11,7 @@ if test -f ./appimagetool; then
 	echo " appimagetool already exists" 1> /dev/null
 else
 	echo " Downloading appimagetool..."
-	wget -q "$(wget -q https://api.github.com/repos/probonopd/go-appimage/releases -O - | sed 's/"/ /g; s/ /\n/g' | grep -o 'https.*continuous.*tool.*86_64.*mage$')" -O appimagetool
+	wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 fi
 chmod a+x ./appimagetool
 
@@ -350,6 +350,6 @@ cd .. || exit 1
 
 # EXPORT THE APPDIR TO AN APPIMAGE
 VERSION=$(curl -Ls https://archlinux.org/packages/extra/x86_64/gnome-boxes/ | grep gnome-boxes | head -1 | tr ' ' '\n' | grep "^[0-9]")
-ARCH=x86_64 VERSION="$VERSION" ./appimagetool -s ./"$APP".AppDir
+ARCH=x86_64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 1 ./"$APP".AppDir
 cd .. && mv ./tmp/*.AppImage ./Boxes-"$VERSION"-x86_86.AppImage || exit 1
 
