@@ -387,6 +387,14 @@ cp "${bootstrap}"/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-* "${boo
 run_in_chroot rm -Rf /usr/include /usr/share/man
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/doc/* -not -iname "*gnome-boxes*" -a -not -name "." -delete'
 run_in_chroot bash -c 'find "${bootstrap}"/usr/share/locale/*/*/* -not -iname "*gnome-boxes*" -a -not -name "." -delete'
+rm -rf "${bootstrap}"/usr/lib/*.a
+#rm -rf "${bootstrap}"/usr/lib/libgallium*
+rm -rf "${bootstrap}"/usr/lib/libgo.so*
+rm -rf "${bootstrap}"/usr/lib/libgphobos.so*
+#rm -rf "${bootstrap}"/usr/lib/libLLVM*
+rm -rf "${bootstrap}"/usr/lib/perl*
+rm -rf "${bootstrap}"/usr/share/ibus/dicts/emoji*
+rm -rf "${bootstrap}"/usr/share/perl*
 
 # Check if the command we are interested in has been installed
 if ! run_in_chroot which gnome-boxes; then echo "Command not found, exiting." && exit 1; fi
