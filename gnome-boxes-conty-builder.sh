@@ -350,6 +350,7 @@ cd .. || exit 1
 
 # EXPORT THE APPDIR TO AN APPIMAGE
 VERSION=$(curl -Ls https://archlinux.org/packages/extra/x86_64/gnome-boxes/ | grep gnome-boxes | head -1 | tr ' ' '\n' | grep "^[0-9]")
-ARCH=x86_64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 1 ./"$APP".AppDir
-cd .. && mv ./tmp/*.AppImage ./Boxes-"$VERSION"-x86_86.AppImage || exit 1
-
+ARCH=x86_64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 1 \
+	-u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Boxes-appimage|continuous|*x86_64.AppImage.zsync" \
+	./"$APP".AppDir ./Boxes-"$VERSION"-x86_86.AppImage
+cd .. && mv ./tmp/*.AppImage* ./ || exit 1
