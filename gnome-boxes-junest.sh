@@ -8,7 +8,8 @@ DEPENDENCES="ca-certificates vulkan-icd-loader sdl2 libva libpng gnutls openal x
 	alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire \
 	libgnomekbd libxklavier nss-mdns libxkbfile libibus \
 	gtk3 glib-networking \
-	ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-truststore"
+	ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-truststore \
+	qemu-base virtiofsd"
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
@@ -348,10 +349,10 @@ echo "-----------------------------------------------------------"
 echo ""
 
 # SAVE FILES USING KEYWORDS
-BINSAVED="certificates SAVEBINSPLEASE" # Enter here keywords to find and save in /usr/bin
-SHARESAVED="certificates osinfo p11-kit" # Enter here keywords or file/directory names to save in both /usr/share and /usr/lib
+BINSAVED="certificates qemu virt" # Enter here keywords to find and save in /usr/bin
+SHARESAVED="certificates osinfo p11-kit qemu virt" # Enter here keywords or file/directory names to save in both /usr/share and /usr/lib
 lib_browser_launcher="gio-launch-desktop libdl.so libpthread.so librt.so libasound.so libX11-xcb.so" # Libraries and files needed to launche the default browser
-LIBSAVED="pk p11 alsa jack pipewire pulse libgtk-3 libgdk-3 gdk-pixbuf librsvg libdav libtinfo libgiognutls $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
+LIBSAVED="pk p11 alsa jack pipewire pulse libgtk-3 libgdk-3 gdk-pixbuf librsvg libdav libtinfo libgiognutls qemu virt $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
 
 # Save files in /usr/bin
 function _savebins() {
