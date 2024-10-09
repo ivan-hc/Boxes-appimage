@@ -5,11 +5,12 @@ APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
 DEPENDENCES="ca-certificates vulkan-icd-loader sdl2 libva libpng gnutls openal xorg-xwayland wayland xdg-user-dirs xorg-server \
 	xorg-apps curl gnome-boxes qemu-desktop hicolor-icon-theme libadwaita xapp libvirt libusb ibus \
-	alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire \
+	alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire pulseaudio \
 	libgnomekbd libxklavier nss-mdns libxkbfile libibus \
 	gtk3 glib-networking \
 	ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-truststore \
-	qemu-base virtiofsd"
+	qemu-base virtiofsd \
+	gstreamer gst-libav gst-plugin-gtk gstreamer-vaapi gst-plugin-qmlgl gst-plugins-base-libs gst-plugins-good"
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
@@ -131,7 +132,7 @@ if [ ! -z "$DEPENDENCES" ]; then
 	./.local/share/junest/bin/junest -- yay --noconfirm -S "$DEPENDENCES"
 fi
 if [ ! -z "$APP" ]; then
-	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3
+	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3 ffmpeg qt5-tools qt6-tools qt5-quickcontrols qt5-x11extras qt5-wayland
 	./.local/share/junest/bin/junest -- yay --noconfirm -S "$APP"
 	./.local/share/junest/bin/junest -- glib-compile-schemas /usr/share/glib-2.0/schemas/
 else
@@ -350,9 +351,10 @@ echo ""
 
 # SAVE FILES USING KEYWORDS
 BINSAVED="certificates qemu virt" # Enter here keywords to find and save in /usr/bin
-SHARESAVED="certificates osinfo p11-kit qemu virt" # Enter here keywords or file/directory names to save in both /usr/share and /usr/lib
+SHARESAVED="certificates osinfo p11-kit qemu virt alsa" # Enter here keywords or file/directory names to save in both /usr/share and /usr/lib
 lib_browser_launcher="gio-launch-desktop libdl.so libpthread.so librt.so libasound.so libX11-xcb.so" # Libraries and files needed to launche the default browser
-LIBSAVED="pk p11 alsa jack pipewire pulse libgtk-3 libgdk-3 gdk-pixbuf librsvg libdav libtinfo libgiognutls qemu virt $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
+LIBSAVED="pk p11 alsa jack pipewire pulse libgtk-3 libgdk-3 gdk-pixbuf librsvg libdav libtinfo libgiognutls \
+	libavfilter libQt5Core libQt5Qml libQt5X11Extras libQt5WaylandClient $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
 
 # Save files in /usr/bin
 function _savebins() {
@@ -518,6 +520,7 @@ function _remove_more_bloatwares() {
 	rm -R -f ./"$APP".AppDir/.junest/usr/share/ibus/dicts/emoji*
 	rm -R -f ./"$APP".AppDir/.junest/usr/share/perl*
 	rm -R -f ./"$APP".AppDir/.junest/usr/share/info
+	rm -R -f ./"$APP".AppDir/.junest/usr/share/man
 	rm -R -f ./"$APP".AppDir/.junest/usr/share/gir-1.0
 	rm -R -f ./"$APP".AppDir/.junest/var/lib/pacman/*
 }
@@ -533,10 +536,18 @@ function _enable_mountpoints_for_the_inbuilt_bubblewrap() {
 	[ ! -f ./"$APP".AppDir/.junest/etc/asound.conf ] && touch ./"$APP".AppDir/.junest/etc/asound.conf
 }
 
+# ADDITIONAL STEPS
+cp ./"$APP".AppDir/.junest/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so ./"$APP".AppDir/.junest/usr/lib/
+cp ./"$APP".AppDir/.junest/usr/lib/gdk-pixbuf*/*/loaders/libpixbufloader-* ./"$APP".AppDir/.junest/usr/lib/
+
 _rsync_main_package
 _rsync_dependences
 _remove_more_bloatwares
 strip --strip-debug ./$APP.AppDir/.junest/usr/lib/*
+strip --strip-debug ./$APP.AppDir/.junest/usr/lib/*/*
+strip --strip-debug ./$APP.AppDir/.junest/usr/lib/*/*/*
+strip --strip-debug ./$APP.AppDir/.junest/usr/lib/*/*/*/*
+strip --strip-debug ./$APP.AppDir/.junest/usr/lib/*/*/*/*/*
 strip --strip-unneeded ./$APP.AppDir/.junest/usr/bin/*
 _enable_mountpoints_for_the_inbuilt_bubblewrap
 
