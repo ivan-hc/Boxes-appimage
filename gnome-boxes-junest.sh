@@ -537,10 +537,6 @@ function _enable_mountpoints_for_the_inbuilt_bubblewrap() {
 	[ ! -f ./"$APP".AppDir/.junest/etc/asound.conf ] && touch ./"$APP".AppDir/.junest/etc/asound.conf
 }
 
-# ADDITIONAL STEPS
-cp ./"$APP".AppDir/.junest/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so ./"$APP".AppDir/.junest/usr/lib/
-cp ./"$APP".AppDir/.junest/usr/lib/gdk-pixbuf*/*/loaders/libpixbufloader-* ./"$APP".AppDir/.junest/usr/lib/
-
 _rsync_main_package
 _rsync_dependences
 _remove_more_bloatwares
@@ -548,6 +544,10 @@ find ./$APP.AppDir/.junest/usr/lib ./$APP.AppDir/.junest/usr/lib32 -type f -rege
 find ./$APP.AppDir/.junest/usr -type f -regex '.*\.so.*' -exec strip --strip-debug {} \;
 find ./$APP.AppDir/.junest/usr/bin -type f ! -regex '.*\.so.*' -exec strip --strip-unneeded {} \;
 _enable_mountpoints_for_the_inbuilt_bubblewrap
+
+# ADDITIONAL STEPS
+rsync -av ./"$APP".AppDir/.junest/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so ./"$APP".AppDir/.junest/usr/lib/
+rsync -av ./"$APP".AppDir/.junest/usr/lib/gdk-pixbuf*/*/loaders/libpixbufloader-* ./"$APP".AppDir/.junest/usr/lib/
 
 # CREATE THE APPIMAGE
 if test -f ./*.AppImage; then
