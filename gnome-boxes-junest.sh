@@ -4,13 +4,14 @@
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
 DEPENDENCES="ca-certificates vulkan-icd-loader sdl2 libva libpng gnutls openal xorg-xwayland wayland xdg-user-dirs xorg-server \
-	xorg-apps curl gnome-boxes qemu-desktop hicolor-icon-theme libadwaita xapp libvirt libusb ibus \
+	xorg-apps curl gnome-boxes qemu-desktop hicolor-icon-theme libadwaita xapp libvirt ibus \
 	alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire pulseaudio \
 	libgnomekbd libxklavier nss-mdns libxkbfile libibus \
 	gtk3 glib-networking \
 	ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-truststore \
 	qemu-base virtiofsd \
-	gstreamer gst-libav gst-plugin-gtk gstreamer-vaapi gst-plugin-qmlgl gst-plugins-base-libs gst-plugins-good"
+	gstreamer gst-libav gst-plugin-gtk gstreamer-vaapi gst-plugin-qmlgl gst-plugins-base-libs gst-plugins-good \
+	libusb-compat libusb dbus"
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
