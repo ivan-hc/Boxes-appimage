@@ -547,7 +547,7 @@ _enable_mountpoints_for_the_inbuilt_bubblewrap
 
 # ADDITIONAL STEPS
 rsync -av ./"$APP".AppDir/.junest/usr/lib/gtk-3.0/3.0.0/immodules/im-ibus.so ./"$APP".AppDir/.junest/usr/lib/
-rsync -av ./"$APP".AppDir/.junest/usr/lib/gdk-pixbuf*/*/loaders/libpixbufloader-* ./"$APP".AppDir/.junest/usr/lib/
+rsync -av ./"$APP".AppDir/.junest/usr/lib/gdk-pixbuf*/*/loaders/libpixbufloader* ./"$APP".AppDir/.junest/usr/lib/
 
 # CREATE THE APPIMAGE
 if test -f ./*.AppImage; then
