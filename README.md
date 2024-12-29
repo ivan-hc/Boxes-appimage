@@ -1,4 +1,8 @@
-Unofficial AppImage of GNOME Boxes built on top of "[JuNest](https://github.com/fsquillace/junest)", the portable Arch Linux container that runs everywhere.
+Unofficial AppImage of GNOME Boxes.
+
+From here you can download the script to build on top of [JuNest](https://github.com/fsquillace/junest), the lightweight Arch Linux based distro that runs, without root privileges, on top of any other Linux distro.
+
+If you are an Nvidia user, for the JuNest-based build, hardware accelleration is provided by [Conty](https://github.com/Kron4ek/Conty). At first start it will install Nvidia drivers locally to allow the builtin Arch Linux container the use of hardware accelleration.
 
 | ![Istantanea_2024-07-26_02-13-48](https://github.com/user-attachments/assets/55634de4-b572-4df4-bc1f-804f5f5f7e80) | ![Istantanea_2024-07-26_02-43-41](https://github.com/user-attachments/assets/d848e5bb-697b-45ea-8ae2-bb00118a828a) | ![Istantanea_2024-07-26_03-03-42](https://github.com/user-attachments/assets/0890c0e6-f23c-4abc-acc8-42a5db0b138b) |
 | - | - | - |
@@ -53,13 +57,11 @@ In brief:
 ### ◆ Lack of USB support
 It is still a work in progress.
 
-### ◆ 3D Acceleration
-Currently not supported, keep the "3D Acceleration" flag disabled or consider using [VirtualBox AppImage](https://github.com/ivan-hc/VirtualBox-appimage).
-
 ---------------------------------
 
 ## Credits
 
+- Conty https://github.com/Kron4ek/Conty
 - JuNest https://github.com/fsquillace/junest
 - Archimage https://github.com/ivan-hc/ArchImage
 
