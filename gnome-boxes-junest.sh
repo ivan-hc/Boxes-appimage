@@ -133,7 +133,7 @@ if [ ! -z "$DEPENDENCES" ]; then
 	./.local/share/junest/bin/junest -- yay --noconfirm -S "$DEPENDENCES"
 fi
 if [ ! -z "$APP" ]; then
-	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3 ffmpeg qt5-tools qt6-tools qt5-quickcontrols qt5-x11extras qt5-wayland
+	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3 ffmpeg qt5-tools qt6-tools qt5-quickcontrols qt5-x11extras qt5-waylandb qt6-wayland
 	./.local/share/junest/bin/junest -- yay --noconfirm -S "$APP"
 	./.local/share/junest/bin/junest -- glib-compile-schemas /usr/share/glib-2.0/schemas/
 else
@@ -209,7 +209,34 @@ function _create_AppRun() {
 	export UNION_PRELOAD=$HERE
 	export JUNEST_HOME=$HERE/.junest
 	export PATH=$PATH:$HERE/.local/share/junest/bin
-	rm -f "$HOME"/.config/libvirt/storage/autostart/gnome-boxes.xml 2> /dev/null
+	rm -f "$HOME"/.config/libvirt/storage/autostart/gnome-boxes.xml 2>/dev/null
+
+	[ -z "$NVIDIA_ON" ] && NVIDIA_ON=1
+	if [ "$NVIDIA_ON" = 1 ]; then
+	  DATADIR="${XDG_DATA_HOME:-$HOME/.local/share}"
+	  CONTY_DIR="${DATADIR}/Conty/overlayfs_shared"
+	  CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+	  [ -f /sys/module/nvidia/version ] && nvidia_driver_version="$(cat /sys/module/nvidia/version)"
+	  [ -f "${CONTY_DIR}"/nvidia/current-nvidia-version ] && nvidia_driver_conty="$(cat "${CONTY_DIR}"/nvidia/current-nvidia-version)"
+	  if [ "${nvidia_driver_version}" != "${nvidia_driver_conty}" ]; then
+	     if command -v curl >/dev/null 2>&1; then
+	        if ! curl --output /dev/null --silent --head --fail https://github.com 1>/dev/null; then
+	          notify-send "You are offline, cannot use Nvidia drivers"
+	        else
+	          notify-send "Configuring Nvidia drivers for this AppImage..."
+	          mkdir -p "${CACHEDIR}" && cd "${CACHEDIR}" || exit 1
+	          curl -Ls "https://raw.githubusercontent.com/ivan-hc/ArchImage/main/nvidia-junest.sh" > nvidia-junest.sh
+	          chmod a+x ./nvidia-junest.sh && ./nvidia-junest.sh
+	        fi
+	     else
+	        notify-send "Missing \"curl\" command, cannot use Nvidia drivers"
+	        echo "You need \"curl\" to download this script"
+	     fi
+	  fi
+	  [ -d "${CONTY_DIR}"/up/usr/bin ] && export PATH="${PATH}":"${CONTY_DIR}"/up/usr/bin:"${PATH}"
+	  [ -d "${CONTY_DIR}"/up/usr/lib ] && export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}":"${CONTY_DIR}"/up/usr/lib:"${LD_LIBRARY_PATH}"
+	  [ -d "${CONTY_DIR}"/up/usr/share ] && export XDG_DATA_DIRS="${XDG_DATA_DIRS}":"${CONTY_DIR}"/up/usr/share:"${XDG_DATA_DIRS}"
+	fi
 
 	BINDS=" --dev-bind /dev /dev \
 		--ro-bind /sys /sys \
@@ -226,6 +253,7 @@ function _create_AppRun() {
 		--bind-try /media /media \
 		--bind-try /mnt /mnt \
 		--bind-try /opt /opt \
+ 		--bind-try /run/media /run/media \
 		--bind-try /usr/lib/locale /usr/lib/locale \
 		--bind-try /usr/share/fonts /usr/share/fonts \
 		--bind-try /usr/share/themes /usr/share/themes \
@@ -355,7 +383,7 @@ BINSAVED="certificates qemu virt" # Enter here keywords to find and save in /usr
 SHARESAVED="certificates osinfo p11-kit qemu virt alsa" # Enter here keywords or file/directory names to save in both /usr/share and /usr/lib
 lib_browser_launcher="gio-launch-desktop libdl.so libpthread.so librt.so libasound.so libX11-xcb.so" # Libraries and files needed to launche the default browser
 LIBSAVED="pk p11 alsa jack pipewire pulse libgtk-3 libgdk-3 gdk-pixbuf librsvg libdav libtinfo libgiognutls \
-	libavfilter libQt5Core libQt5Qml libQt5X11Extras libQt5WaylandClient $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
+ libavfilter libQt5Core libQt5Qml libQt5X11Extras libQt5WaylandClient libQt6WaylandClient $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
 
 # Save files in /usr/bin
 function _savebins() {
@@ -532,6 +560,7 @@ function _enable_mountpoints_for_the_inbuilt_bubblewrap() {
 	mkdir -p ./"$APP".AppDir/.junest/usr/lib/locale
 	mkdir -p ./"$APP".AppDir/.junest/usr/share/fonts
 	mkdir -p ./"$APP".AppDir/.junest/usr/share/themes
+	mkdir -p ./"$APP".AppDir/.junest/run/media
 	mkdir -p ./"$APP".AppDir/.junest/run/user
 	rm -f ./"$APP".AppDir/.junest/etc/localtime && touch ./"$APP".AppDir/.junest/etc/localtime
 	[ ! -f ./"$APP".AppDir/.junest/etc/asound.conf ] && touch ./"$APP".AppDir/.junest/etc/asound.conf
@@ -540,9 +569,9 @@ function _enable_mountpoints_for_the_inbuilt_bubblewrap() {
 _rsync_main_package
 _rsync_dependences
 _remove_more_bloatwares
-find ./$APP.AppDir/.junest/usr/lib ./$APP.AppDir/.junest/usr/lib32 -type f -regex '.*\.a' -exec rm -f {} \;
-find ./$APP.AppDir/.junest/usr -type f -regex '.*\.so.*' -exec strip --strip-debug {} \;
-find ./$APP.AppDir/.junest/usr/bin -type f ! -regex '.*\.so.*' -exec strip --strip-unneeded {} \;
+find ./"$APP".AppDir/.junest/usr/lib ./"$APP".AppDir/.junest/usr/lib32 -type f -regex '.*\.a' -exec rm -f {} \;
+find ./"$APP".AppDir/.junest/usr -type f -regex '.*\.so.*' -exec strip --strip-debug {} \;
+find ./"$APP".AppDir/.junest/usr/bin -type f ! -regex '.*\.so.*' -exec strip --strip-unneeded {} \;
 _enable_mountpoints_for_the_inbuilt_bubblewrap
 
 # ADDITIONAL STEPS
@@ -555,4 +584,4 @@ if test -f ./*.AppImage; then
 fi
 ARCH=x86_64 ./appimagetool --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
 	-u "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Boxes-appimage|continuous|*x86_64.AppImage.zsync" \
-	./"$APP".AppDir ./"$(cat ./"$APP".AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION"-archimage3.4.4-2-x86_64.AppImage
+	./"$APP".AppDir ./"$(cat ./"$APP".AppDir/*.desktop | grep 'Name=' | head -1 | cut -c 6- | sed 's/ /-/g')"_"$VERSION"-archimage4-x86_64.AppImage
