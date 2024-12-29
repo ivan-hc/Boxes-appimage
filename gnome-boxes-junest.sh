@@ -3,7 +3,7 @@
 # NAME OF THE APP BY REPLACING "SAMPLE"
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="ca-certificates vulkan-icd-loader sdl2 libva libpng gnutls openal xorg-xwayland wayland xdg-user-dirs xorg-server \
+DEPENDENCES="ca-certificates sdl2 libva libpng gnutls openal xorg-xwayland wayland xdg-user-dirs xorg-server \
 	xorg-apps curl gnome-boxes qemu-desktop hicolor-icon-theme libadwaita xapp libvirt ibus \
 	alsa-lib alsa-plugins libpulse jack2 alsa-tools alsa-utils pipewire pulseaudio \
 	libgnomekbd libxklavier nss-mdns libxkbfile libibus \
@@ -11,7 +11,8 @@ DEPENDENCES="ca-certificates vulkan-icd-loader sdl2 libva libpng gnutls openal x
 	ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-truststore \
 	qemu-base virtiofsd \
 	gstreamer gst-libav gst-plugin-gtk gstreamer-vaapi gst-plugin-qmlgl gst-plugins-base-libs gst-plugins-good \
-	libusb-compat libusb dbus"
+	libusb-compat libusb dbus \
+	mesa vulkan-icd-loader vulkan-mesa-layers libva-mesa-driver"
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
@@ -133,7 +134,7 @@ if [ ! -z "$DEPENDENCES" ]; then
 	./.local/share/junest/bin/junest -- yay --noconfirm -S "$DEPENDENCES"
 fi
 if [ ! -z "$APP" ]; then
-	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3 ffmpeg qt5-tools qt6-tools qt5-quickcontrols qt5-x11extras qt5-waylandb qt6-wayland
+	./.local/share/junest/bin/junest -- yay --noconfirm -S alsa-lib gtk3 ffmpeg qt5-tools qt6-tools qt5-quickcontrols qt5-x11extras qt5-wayland qt6-wayland
 	./.local/share/junest/bin/junest -- yay --noconfirm -S "$APP"
 	./.local/share/junest/bin/junest -- glib-compile-schemas /usr/share/glib-2.0/schemas/
 else
@@ -383,7 +384,8 @@ BINSAVED="certificates qemu virt" # Enter here keywords to find and save in /usr
 SHARESAVED="certificates osinfo p11-kit qemu virt alsa" # Enter here keywords or file/directory names to save in both /usr/share and /usr/lib
 lib_browser_launcher="gio-launch-desktop libdl.so libpthread.so librt.so libasound.so libX11-xcb.so" # Libraries and files needed to launche the default browser
 LIBSAVED="pk p11 alsa jack pipewire pulse libgtk-3 libgdk-3 gdk-pixbuf librsvg libdav libtinfo libgiognutls \
- libavfilter libQt5Core libQt5Qml libQt5X11Extras libQt5WaylandClient libQt6WaylandClient $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
+ libavfilter libQt5Core libQt5Qml libQt5X11Extras libQt5WaylandClient \
+ libavfilter libQt6Core libQt6Qml libQt6X11Extras libQt6WaylandClient $lib_browser_launcher" # Enter here keywords or file/directory names to save in /usr/lib
 
 # Save files in /usr/bin
 function _savebins() {
