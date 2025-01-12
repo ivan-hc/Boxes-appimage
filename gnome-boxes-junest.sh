@@ -3,7 +3,7 @@
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
 DEPENDENCES="glib-networking hicolor-icon-theme libadwaita xapp \
-ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-truststore \
+ca-certificates-mozilla ca-certificates-utils gnutls gsettings-system-schemas libproxy python-gobject python-truststore \
 libgnomekbd libxklavier nss-mdns libxkbfile libibus \
 qemu-base qemu-desktop libvirt  virtiofsd" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCES ARE NEEDED
 #BASICSTUFF="binutils debugedit gzip"
@@ -224,7 +224,6 @@ if command -v unshare >/dev/null 2>&1 && ! unshare --user -p /bin/true >/dev/nul
 else
    export PATH="$PATH":"$HERE"/.local/share/junest/bin
 fi
-rm -f "$HOME"/.config/libvirt/storage/autostart/gnome-boxes.xml 2>/dev/null
 
 [ -z "$NVIDIA_ON" ] && NVIDIA_ON=1
 if [ "$NVIDIA_ON" = 1 ]; then
@@ -276,7 +275,7 @@ _JUNEST_CMD() {
 
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
 
-_JUNEST_CMD -- /usr/bin/gnome-boxes "$@"
+_JUNEST_CMD -- $EXEC "$@"
 
 HEREDOC
 chmod a+x ./AppRun
@@ -369,7 +368,7 @@ _extract_all_dependences() {
 	done
 
 	# Set the level of sub-dependencies extraction, the higher the number, the bigger the AppImage will be
-	[ -z "$extraction_count" ] && extraction_count=1
+	[ -z "$extraction_count" ] && extraction_count=2
 	for e in $(seq "$extraction_count"); do _extract_deps; done
 
 	rm -f ./packages
@@ -570,7 +569,7 @@ _remove_more_bloatwares() {
 	for r in $lib_remove; do
 		rm -Rf ./"$APP".AppDir/.junest/usr/lib/"$r"*
 	done
-	share_remove="gcc perl info gir"
+	share_remove="d3d gcc gconv perl info gir icons/Adwaita/cursors/ icons/AdwaitaLegacy z"
 	for r in $share_remove; do
 		rm -Rf ./"$APP".AppDir/.junest/usr/share/"$r"*
 	done
@@ -583,9 +582,9 @@ _remove_more_bloatwares() {
 	rm -Rf ./"$APP".AppDir/.junest/usr/share/man # AppImages are not ment to have man command
 	rm -Rf ./"$APP".AppDir/.junest/usr/lib/python*/__pycache__/* # if python is installed, removing this directory can save several megabytes
 	rm -Rf ./"$APP".AppDir/.junest/usr/lib/*.a
-	#rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgallium*
+	rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgallium*
 	rm -Rf ./"$APP".AppDir/.junest/usr/lib/libgo.so*
-	#rm -Rf ./"$APP".AppDir/.junest/usr/lib/libLLVM* # included in the compilation phase, can sometimes be excluded for daily use
+	rm -Rf ./"$APP".AppDir/.junest/usr/lib/libLLVM* # included in the compilation phase, can sometimes be excluded for daily use
 	rm -Rf ./"$APP".AppDir/.junest/var/* # remove all packages downloaded with the package manager
 }
 
