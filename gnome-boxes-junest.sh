@@ -2,7 +2,7 @@
 
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES="ca-certificates-mozilla ca-certificates-utils gdk-pixbuf-xlib glib-networking gnutls ibus libibus libvirt qemu-base virtiofsd" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
+DEPENDENCES="ca-certificates-mozilla ca-certificates-utils gdk-pixbuf-xlib glib-networking gnutls hidapi ibus libibus libvirt qemu-base virtiofsd" #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
