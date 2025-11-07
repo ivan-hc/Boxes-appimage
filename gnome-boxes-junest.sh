@@ -2,7 +2,7 @@
 
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES=$(echo "ca-certificates-mozilla ca-certificates-utils gdk-pixbuf-xlib glib-networking gnutls hidapi ibus libibus libvirt qemu-base virtiofsd $(curl -Ls "https://gitlab.archlinux.org/archlinux/packaging/packages/gnome-boxes/-/raw/main/.SRCINFO" | grep "depends =" | grep -v makedepends | awk '{print $3}' | xargs)" | tr ' ' '\n' | sort -u | xargs) #SYNTAX: "APP1 APP2 APP3 APP4...", LEAVE BLANK IF NO OTHER DEPENDENCIES ARE NEEDED
+DEPENDENCES=$(curl -Ls "https://gitlab.archlinux.org/archlinux/packaging/packages/gnome-boxes/-/raw/main/.SRCINFO" | grep "depends =" | grep -v makedepends | awk '{print $3}' | xargs); [ -z "$DEPENDENCES" ] && exit 0; DEPENDENCES=$(echo "ca-certificates-mozilla ca-certificates-utils gdk-pixbuf-xlib glib-networking gnutls hidapi ibus libibus libvirt qemu-base virtiofsd spice spice-gtk spice-protocol spice-up spice-vdagent $DEPENDENCES" | tr ' ' '\n' | sort -u | xargs)
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
@@ -16,7 +16,7 @@ LIBSAVED="libogg.so libvorbisenc.so libFLAC.so libmpg123.so libpxbackend pixbuf 
 # Some keywords and paths are already set. Remove them if you consider them necessary for the AppImage to function properly.
 ETC_REMOVED="makepkg.conf pacman"
 BIN_REMOVED="gcc"
-LIB_REMOVED="gcc libgo.so"
+LIB_REMOVED="gcc libgphobos.so perl systemd libgo.so libgallium"
 PYTHON_REMOVED="__pycache__/"
 SHARE_REMOVED="gcc gir ibus/dicts/emoji icons/Adwaita/cursors/ icons/AdwaitaLegacy perl terminfo"
 
