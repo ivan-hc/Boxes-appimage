@@ -30,8 +30,8 @@ mountpoint_dirs=""
 # Post-installation processes (add whatever you want)
 _post_installation_processes() {
 	printf "\n◆ User's processes: \n\n"
-	echo " - None"
-	# Add here your code
+	echo " - Fix missing im-ibus.so message"
+	cp -r "$(find . -name im-ibus.so | head -1)" AppDir/.junest/usr/lib/
 }
 
 ##########################################################################################################################################################
