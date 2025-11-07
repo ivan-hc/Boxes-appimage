@@ -2,7 +2,7 @@
 
 APP=gnome-boxes
 BIN="$APP" #CHANGE THIS IF THE NAME OF THE BINARY IS DIFFERENT FROM "$APP" (for example, the binary of "obs-studio" is "obs")
-DEPENDENCES=$(curl -Ls "https://gitlab.archlinux.org/archlinux/packaging/packages/gnome-boxes/-/raw/main/.SRCINFO" | grep "depends =" | grep -v makedepends | awk '{print $3}' | xargs); [ -z "$DEPENDENCES" ] && exit 0; DEPENDENCES=$(echo "ca-certificates-mozilla ca-certificates-utils gdk-pixbuf-xlib glib-networking gnutls hidapi ibus libibus libvirt qemu-base virtiofsd spice spice-gtk spice-protocol spice-up spice-vdagent $DEPENDENCES" | tr ' ' '\n' | sort -u | xargs)
+DEPENDENCES=$(curl -Ls "https://gitlab.archlinux.org/archlinux/packaging/packages/gnome-boxes/-/raw/main/.SRCINFO" | grep "depends =" | grep -v makedepends | awk '{print $3}' | xargs); [ -z "$DEPENDENCES" ] && exit 0; DEPENDENCES=$(echo "ca-certificates-mozilla ca-certificates-utils gdk-pixbuf-xlib glib-networking gnutls gstreamer hidapi ibus libibus libvirt qemu-base virtiofsd spice spice-gtk spice-protocol spice-up spice-vdagent $DEPENDENCES" | tr ' ' '\n' | sort -u | xargs)
 #BASICSTUFF="binutils debugedit gzip"
 #COMPILERS="base-devel"
 
